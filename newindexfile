@@ -1,0 +1,33 @@
+import { useEffect, useState } from "react";
+
+export default function Home() {
+  const [products, setProducts] = useState([]);
+  useEffect(() => {
+    fetch("/api/products").then(r => r.json()).then(setProducts);
+  }, []);
+  const createCheckout = async (id) => {
+    const res = await fetch("/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productId: id })
+    });
+    const data = await res.json();
+    if (data.url) window.location = data.url;
+    else alert("Checkout error");
+  };
+  return (
+    <main style={{ padding: 20 }}>
+      <h1>Digital Storefront</h1>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
+        {products.map(p => (
+          <div key={p._id} style={{ border: "1px solid #ddd", padding: 12 }}>
+            <h3>{p.title}</h3>
+            <p>{p.description}</p>
+            <p>${(p.price/100).toFixed(2)}</p>
+            <button onClick={() => createCheckout(p._id)}>Buy</button>
+          </div>
+        ))}
+      </div>
+    </main>
+  );
+}
